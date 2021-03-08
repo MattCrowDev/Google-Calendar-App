@@ -2,7 +2,7 @@
   "name": "google-calendar-app",
   "version": "1.0.0",
   "description": "Display and allow me to edit my google calander",
-  "main": "index.js",
+  "main": "scripts/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

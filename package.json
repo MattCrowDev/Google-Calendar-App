@@ -2,9 +2,10 @@
   "name": "google-calendar-app",
   "version": "1.0.0",
   "description": "Display and allow me to edit my google calander",
-  "main": "scripts/index.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devStart": "nodemon scripts/index.js"
   },
   "repository": {
     "type": "git",
@@ -17,6 +18,9 @@
   },
   "homepage": "https://github.com/OTWdesigns/Google-Calendar-App#readme",
   "dependencies": {
-    "googleapis": "^67.1.1"
+    "express": "^4.17.1",
+    "googleapis": "^67.1.1",
+    "nodemon": "^2.0.7",
+    "pug": "^3.0.2"
   }
 }

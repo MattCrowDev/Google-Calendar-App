@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!--upload an event-->
+    <div>
+        upload an event!!!
+        <form action="/create_event" method="post" target="_self">
+            <div class="form-group">
+                <input type="text" name="summary" id="summary" placeholder="summary"><br>
+                <input type="text" name="location" id="location" placeholder="location"><br>
+                <input type="text" name="description" id="description" placeholder="description"><br>
+                <input type="text" name="colorId" id="colorId" placeholder="colorId">
+                <br>
+                <br>
+                <label for="startDate">Event start date</label>
+                <input type="date" id="startDate" name="startDate">
+                <br>
+                <label for="startTime">Event start time</label>
+                <input type="time" id="startTime" name="startTime">
+                <br>
+                <br>
+                <label for="endDate">Event end date</label>
+                <input type="date" id="endDate" name="endDate">
+                <br>
+                <label for="endTime">Event end time</label>
+                <input type="time" id="endTime" name="endTime">
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+        </form>
+      
+    </div>
+</body>
+</html>

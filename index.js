@@ -1,5 +1,4 @@
-//https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
-
+//npm run devStart
 const clientInfo = require('./keys.json');
 const {google} = require('googleapis');
 const {OAuth2} = google.auth;
@@ -7,6 +6,7 @@ const path = require('path');
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
+const { time } = require('console');
 
 
 //==================================================================================//
@@ -25,10 +25,9 @@ oAuth2Client.setCredentials({refresh_token: REFRESH_TOKEN});
 // Create a new calender instance.
 const calendar = google.calendar({ version: 'v3', auth: oAuth2Client })
 
-
 //==================================================================================//
 //==================================================================================//
-//==========================load the main page and server===========================//
+//=========================load the main pages and server===========================//
 //==================================================================================//
 //==================================================================================//
 app.use(bodyParser.urlencoded(
@@ -37,9 +36,20 @@ app.use(bodyParser.urlencoded(
 }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + 'public'));
+
+
 app.get('/',function(req,res){
   res.sendFile(path.join(__dirname+'/public/pages/index.html'));
 });
+app.get('/new-event',function(req,res){
+  res.sendFile(path.join(__dirname+'/public/pages/new-event.html'));
+});
+
+//404
+app.get('*', function(req, res){
+  res.sendFile(path.join(__dirname+'/public/pages/404.html'));
+});
+
 app.listen(3000, function()
 {
   console.log('server is online')
@@ -51,94 +61,81 @@ app.listen(3000, function()
 //=============================Handle creating an event=============================//
 //==================================================================================//
 //==================================================================================//
-app.post('/create_event',function(req,res)
+app.post('/new-event-confirm',function(req,res)
 {
   //set the variables gained from the fourm data
-  //var 
+  var summary = req.body.summary,
+  location = req.body.location,
+  description = req.body.description,
+  colorId = req.body.colorId,
+  startDate = req.body.startDate,
+  startTime = req.body.startTime,
+  endDate = req.body.endDate,
+  endTime = req.body.endTime,
+  timezone = req.body.timezone;
 
-
-
-
-//post test==================================================================================================================================
-    var date = req.body.birthday;
-    console.log(date)
-   var username = req.body.username;
-   var htmlData = 'Hello:' + username;
-   res.send(htmlData);
-   console.log(htmlData);
-
-
-//calander test==================================================================================================================================
-  
-// Create a new event start date instance for temp uses in our calendar.
-const eventStartTime = new Date() 
-eventStartTime.setDate(eventStartTime.getDate() + 1)
-
-// Create a new event end date instance for temp uses in our calendar.
-const eventEndTime = new Date()
-eventEndTime.setDate(eventEndTime.getDate() + 2)
-eventEndTime.setMinutes(eventEndTime.getMinutes() + 45)
-console.log(eventStartTime);
-console.log(eventEndTime);
-// Create a dummy event for temp uses in our calendar
-const event = {
-  summary: `Meeting with David`,
-  location: `3595 California St, San Francisco, CA 94118`,
-  description: `Meet with David to talk about the new client project and how to integrate the calendar for booking.`,
-  colorId: 1,
-  start: {
-    dateTime: eventStartTime,
-    timeZone: 'America/Denver',
-  },
-  end: {
-    dateTime: eventEndTime,
-    timeZone: 'America/Denver',
-  },
-}
-
-
-
-
-
-
-
-
-
-
-// Check if we a busy and have an event on our calendar for the same time.
-calendar.freebusy.query(
+  //-----------------------------------------------------------------------// 
+  //------------------------create the actual event------------------------// 
+  //-----------------------------------------------------------------------//
+  //set a start date
+  const eventStartTime = new Date(startDate + ' ' + startTime + ' GMT') 
+  //Set an end date
+  const eventEndTime = new Date(endDate + ' ' + endTime + ' GMT')
+  const event = 
   {
-    resource: {
-      timeMin: eventStartTime,
-      timeMax: eventEndTime,
-      timeZone: 'America/Denver',
-      items: [{ id: 'primary' }],
+    summary: summary,
+    location: location,
+    description: description,
+    colorId: colorId,
+    start: 
+    {
+      dateTime: eventStartTime,
+      timeZone: timezone,
     },
-  },
-  (err, res) => {
-    // Check for errors in our query and log them if they exist.
-    if (err) return console.error('Free Busy Query Error: ', err)
-
-    // Create an array of all events on our calendar during that time.
-    const eventArr = res.data.calendars.primary.busy
-
-    // Check if event array is empty which means we are not busy
-    if (eventArr.length === 0)
-      // If we are not busy create a new calendar event.
-      return calendar.events.insert(
-        { calendarId: 'primary', resource: event },
-        err => {
-          // Check for errors and log them if they exist.
-          if (err) return console.error('Error Creating Calender Event:', err)
-          // Else log that the event was created.
-          return console.log('Calendar event successfully created.')
-        }
-      )
-
-    // If event array is not empty log that we are busy.
-    return console.log(`Sorry I'm busy...`)
+    end: 
+    {
+      dateTime: eventEndTime,
+      timeZone: timezone,
+    },
   }
-)
+  //Check if the calander already has an event planned
+  calendar.freebusy.query(
+    {
+      resource: 
+      {
+        timeMin: eventStartTime,
+        timeMax: eventEndTime,
+        timeZone: 'America/Denver',
+        items: [{ id: 'primary' }],
+      },
+    },
+    (err, res) => 
+    {
+      // Check for errors in our query and log them if they exist.
+      if (err) return console.error('Free Busy Query Error: ', err)
+
+      // Create an array of all events on our calendar during that time.
+      const eventArr = res.data.calendars.primary.busy
+
+      // Check if event array is empty which means we are not busy
+      if (eventArr.length === 0)
+        // If we are not busy create a new calendar event.
+        return calendar.events.insert(
+          { calendarId: 'primary', resource: event },
+          err => {
+            // Check for errors and log them if they exist.
+            if (err) return console.error('Error Creating Calender Event:', err)
+            // Else log that the event was created.
+            return console.log('Calendar event successfully created.')
+          }
+        )
+
+      // If event array is not empty log that we are busy.
+      return console.log(`Sorry I'm busy...`)
+    }
+  )
+  //load the confirmation page
+  res.sendFile(__dirname + '/public/pages/new-event-confirm.html');
 });
 
 
